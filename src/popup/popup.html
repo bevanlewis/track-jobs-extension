@@ -3,10 +3,113 @@
   <head>
     <meta charset="UTF-8" />
     <title>Job Tracker</title>
+    <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
-    <h1>Job Tracker</h1>
-    <p>Save LinkedIn job details to your Google Sheet.</p>
-    <div id="job-details">(Job details will appear here)</div>
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <h1>Job Tracker</h1>
+        <p>Save LinkedIn job details to your Google Sheet</p>
+      </div>
+
+      <!-- Loading State -->
+      <div id="loading" class="loading">Loading...</div>
+
+      <!-- Authentication Section -->
+      <div id="auth-section" class="section hidden">
+        <h2>Authentication Required</h2>
+        <p>Please sign in with Google to continue</p>
+        <button id="signin-btn" class="btn">Sign in with Google</button>
+      </div>
+
+      <!-- Sheet Connection Section -->
+      <div id="sheet-section" class="section hidden">
+        <h2>Connect Google Sheet</h2>
+        <div class="form-group">
+          <label for="sheet-url">Google Sheet URL:</label>
+          <input
+            type="text"
+            id="sheet-url"
+            placeholder="https://docs.google.com/spreadsheets/d/..."
+          />
+        </div>
+        <button id="connect-btn" class="btn">Connect Sheet</button>
+      </div>
+
+      <!-- Job Details Section -->
+      <div id="job-section" class="section hidden">
+        <h2>Job Details</h2>
+
+        <!-- Job Info Display -->
+        <div id="job-details" class="job-details">
+          <h3>Extracted Job Information</h3>
+          <p>
+            <strong>Company:</strong>
+            <span id="company-display">Loading...</span>
+          </p>
+          <p>
+            <strong>Role:</strong> <span id="role-display">Loading...</span>
+          </p>
+          <p>
+            <strong>Link:</strong> <span id="link-display">Loading...</span>
+          </p>
+        </div>
+
+        <!-- Sheet Connection Status -->
+        <div id="sheet-info" class="sheet-info hidden">
+          <div class="sheet-header">
+            <strong>Connected to:</strong>
+            <span id="sheet-name">Loading...</span>
+            <button id="disconnect-btn" class="btn btn-secondary btn-small">
+              Disconnect
+            </button>
+          </div>
+        </div>
+
+        <!-- Job Form -->
+        <form id="job-form">
+          <div class="form-group">
+            <label for="stage">Application Stage:</label>
+            <select id="stage" required>
+              <option value="">Select Stage</option>
+              <option value="Applied">Applied</option>
+              <option value="Interviewing">Interviewing</option>
+              <option value="Ghosted">Ghosted</option>
+              <option value="Rejected">Rejected</option>
+              <option value="Accepted">Accepted</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="priority">Priority:</label>
+            <select id="priority" required>
+              <option value="">Select Priority</option>
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="notes">Notes (Optional):</label>
+            <textarea
+              id="notes"
+              rows="3"
+              placeholder="Add any additional notes..."
+            ></textarea>
+          </div>
+
+          <button type="submit" id="save-btn" class="btn">
+            Save to Google Sheet
+          </button>
+        </form>
+      </div>
+
+      <!-- Status Messages -->
+      <div id="status" class="status hidden"></div>
+    </div>
+
+    <script src="popup.js"></script>
   </body>
 </html>

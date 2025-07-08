@@ -73,8 +73,14 @@ function createSaveJobButton() {
   console.log("Save Job button created.");
   // Styles are now in content/content.css
   button.addEventListener("click", () => {
-    // Extract and log job data when the button is clicked
-    extractJobData();
+    // Extract job data when the button is clicked
+    const jobData = extractJobData();
+
+    // Send message to popup with job data
+    chrome.runtime.sendMessage({
+      action: "openPopup",
+      jobData: jobData,
+    });
   });
   return button;
 }
@@ -97,6 +103,26 @@ function injectButton() {
     setTimeout(injectButton, 1000);
   }
 }
+
+// Listen for messages from popup
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === "getJobData") {
+    try {
+      const jobData = extractJobData();
+      sendResponse({
+        success: true,
+        data: jobData,
+      });
+    } catch (error) {
+      console.error("Failed to extract job data:", error);
+      sendResponse({
+        success: false,
+        error: error.message,
+      });
+    }
+    return true; // Keep the message channel open for async response
+  }
+});
 
 // Run the injection when the script loads
 injectButton();
