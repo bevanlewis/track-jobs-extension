@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Job Tracker for LinkedIn",
+  "version": "0.1.0",
+  "description": "Save LinkedIn job details directly to your Google Sheet.",
+  "permissions": ["storage", "identity"],
+  "host_permissions": ["https://www.linkedin.com/jobs/view/*"],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.linkedin.com/jobs/view/*",
+        "https://www.linkedin.com/jobs/search/*",
+        "https://www.linkedin.com/jobs/collections/*"
+      ],
+      "js": ["src/content/content.js"],
+      "css": ["src/content/content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "src/popup/popup.html"
+  },
+  "options_page": "src/options/options.html"
+}

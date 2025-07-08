@@ -1,0 +1,13 @@
+/* Styles for the Save Job button injected by the Job Tracker extension */
+#job-tracker-save-btn {
+  position: relative;
+  margin: 8px;
+  padding: 8px 16px;
+  background: #0073b1; /* LinkedIn blue */
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  z-index: 1000;
+}
