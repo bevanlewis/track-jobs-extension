@@ -1,5 +1,5 @@
 // popup.js - Handle popup functionality for Job Tracker extension
-import config from "./config.js";
+import config from "../config.js";
 
 class JobTrackerPopup {
   constructor() {
@@ -331,12 +331,18 @@ class JobTrackerPopup {
           (response) => {
             if (response && response.success) {
               this.handleJobData(response.data);
+            } else {
+              this.showNoJobSection();
             }
           }
         );
+      } else {
+        // Not a LinkedIn job page
+        this.showNoJobSection();
       }
     } catch (error) {
       console.error("Failed to get job data:", error);
+      this.showNoJobSection();
     }
   }
 
