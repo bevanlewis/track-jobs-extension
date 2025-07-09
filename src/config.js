@@ -4,7 +4,7 @@ const config = {
   // Backend URL - change this when deploying to production
   // For development: http://localhost:3000
   // For production: https://your-domain.com
-  backendUrl: "http://localhost:3000",
+  backendUrl: "https://track-jobs-backend.vercel.app/",
 
   // API endpoints (relative to backendUrl)
   api: {

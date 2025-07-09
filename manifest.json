@@ -9,7 +9,8 @@
     "https://www.linkedin.com/jobs/search/*",
     "https://www.linkedin.com/jobs/collections/*",
     "https://www.linkedin.com/jobs/*",
-    "http://localhost:3000/*"
+    "http://localhost:3000/*",
+    "https://track-jobs-backend.vercel.app/*"
   ],
   "background": {
     "service_worker": "src/background.js"
