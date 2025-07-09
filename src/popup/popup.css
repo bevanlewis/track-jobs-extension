@@ -199,6 +199,17 @@ body {
   color: #28a745;
 }
 
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.action-buttons .btn {
+  width: 100%;
+}
+
 /* Animations */
 @keyframes slideIn {
   from {

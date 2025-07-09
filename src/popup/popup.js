@@ -1,8 +1,9 @@
 // popup.js - Handle popup functionality for Job Tracker extension
+import config from "./config.js";
 
 class JobTrackerPopup {
   constructor() {
-    this.backendUrl = "http://localhost:3000"; // Your Next.js backend
+    this.backendUrl = config.backendUrl; // Get from config
     this.currentJobData = null;
     this.spreadsheetId = null;
     this.sheetName = null;
@@ -22,6 +23,7 @@ class JobTrackerPopup {
     this.loadingEl = document.getElementById("loading");
     this.authSectionEl = document.getElementById("auth-section");
     this.sheetSectionEl = document.getElementById("sheet-section");
+    this.noJobSectionEl = document.getElementById("no-job-section");
     this.jobSectionEl = document.getElementById("job-section");
 
     // Buttons
@@ -29,6 +31,8 @@ class JobTrackerPopup {
     this.connectBtn = document.getElementById("connect-btn");
     this.saveBtn = document.getElementById("save-btn");
     this.disconnectBtn = document.getElementById("disconnect-btn");
+    this.disconnectBtnNoJob = document.getElementById("disconnect-btn-no-job");
+    this.logoutBtn = document.getElementById("logout-btn");
 
     // Form elements
     this.sheetUrlInput = document.getElementById("sheet-url");
@@ -43,6 +47,8 @@ class JobTrackerPopup {
     this.linkDisplay = document.getElementById("link-display");
     this.sheetNameEl = document.getElementById("sheet-name");
     this.sheetInfoEl = document.getElementById("sheet-info");
+    this.sheetNameNoJobEl = document.getElementById("sheet-name-no-job");
+    this.sheetInfoNoJobEl = document.getElementById("sheet-info-no-job");
 
     // Status
     this.statusEl = document.getElementById("status");
@@ -56,6 +62,10 @@ class JobTrackerPopup {
     this.disconnectBtn.addEventListener("click", () =>
       this.handleDisconnectSheet()
     );
+    this.disconnectBtnNoJob.addEventListener("click", () =>
+      this.handleDisconnectSheet()
+    );
+    this.logoutBtn.addEventListener("click", () => this.handleLogout());
 
     // Listen for messages from content script using stored listener
     chrome.runtime.onMessage.addListener(this.messageListener);
@@ -103,14 +113,18 @@ class JobTrackerPopup {
       if (savedSheetId) {
         this.spreadsheetId = savedSheetId;
         await this.loadSheetName();
-        this.showJobSection();
+
+        // Try to get job data from current tab
+        await this.getCurrentTabJobData();
+
+        // Show appropriate section based on job data availability
+        if (this.currentJobData) {
+          this.showJobSection();
+        } else {
+          this.showNoJobSection();
+        }
       } else {
         this.showSheetSection();
-      }
-
-      // Try to get job data from current tab if no stored data
-      if (!this.currentJobData) {
-        await this.getCurrentTabJobData();
       }
     } catch (error) {
       console.error("Popup initialization failed:", error);
@@ -182,9 +196,27 @@ class JobTrackerPopup {
   // Wait for OAuth popup to complete
   waitForOAuthCompletion(popup) {
     return new Promise((resolve, reject) => {
+      // Listen for messages from the OAuth popup
+      const messageListener = (event) => {
+        if (event.origin !== this.backendUrl) return;
+
+        if (event.data.type === "OAUTH_SUCCESS") {
+          window.removeEventListener("message", messageListener);
+          clearInterval(checkClosed);
+          resolve();
+        } else if (event.data.type === "OAUTH_ERROR") {
+          window.removeEventListener("message", messageListener);
+          clearInterval(checkClosed);
+          reject(new Error(event.data.message || "Authentication failed"));
+        }
+      };
+
+      window.addEventListener("message", messageListener);
+
       const checkClosed = setInterval(() => {
         if (popup.closed) {
           clearInterval(checkClosed);
+          window.removeEventListener("message", messageListener);
           resolve();
         }
       }, 1000);
@@ -192,6 +224,7 @@ class JobTrackerPopup {
       // Timeout after 5 minutes
       setTimeout(() => {
         clearInterval(checkClosed);
+        window.removeEventListener("message", messageListener);
         popup.close();
         reject(new Error("OAuth timeout"));
       }, 300000);
@@ -316,8 +349,8 @@ class JobTrackerPopup {
     this.roleDisplay.textContent = jobData.role || "Not found";
     this.linkDisplay.textContent = jobData.applicationLink || "Not found";
 
-    // Show job section if not already shown
-    if (this.jobSectionEl.classList.contains("hidden")) {
+    // Show job section if we have a sheet connected
+    if (this.spreadsheetId) {
       this.showJobSection();
     }
   }
@@ -401,10 +434,39 @@ class JobTrackerPopup {
       if (response.ok) {
         this.sheetName = data.sheetName;
         this.sheetNameEl.textContent = this.sheetName;
+        this.sheetNameNoJobEl.textContent = this.sheetName;
         this.sheetInfoEl.classList.remove("hidden");
+        this.sheetInfoNoJobEl.classList.remove("hidden");
       }
     } catch (error) {
       console.error("Failed to load sheet name:", error);
+    }
+  }
+
+  // Handle logout
+  async handleLogout() {
+    try {
+      this.logoutBtn.disabled = true;
+      this.logoutBtn.textContent = "Logging out...";
+
+      // Call backend logout endpoint
+      const response = await fetch(`${this.backendUrl}/api/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        this.showSuccess("Successfully logged out");
+        this.showAuthSection();
+      } else {
+        throw new Error("Logout failed");
+      }
+    } catch (error) {
+      console.error("Logout failed:", error);
+      this.showError("Failed to logout. Please try again.");
+    } finally {
+      this.logoutBtn.disabled = false;
+      this.logoutBtn.textContent = "Logout";
     }
   }
 
@@ -445,6 +507,11 @@ class JobTrackerPopup {
     this.sheetSectionEl.classList.remove("hidden");
   }
 
+  showNoJobSection() {
+    this.hideAllSections();
+    this.noJobSectionEl.classList.remove("hidden");
+  }
+
   showJobSection() {
     this.hideAllSections();
     this.jobSectionEl.classList.remove("hidden");
@@ -454,6 +521,7 @@ class JobTrackerPopup {
     this.loadingEl.classList.add("hidden");
     this.authSectionEl.classList.add("hidden");
     this.sheetSectionEl.classList.add("hidden");
+    this.noJobSectionEl.classList.add("hidden");
     this.jobSectionEl.classList.add("hidden");
   }
 

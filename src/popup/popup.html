@@ -37,6 +37,31 @@
         <button id="connect-btn" class="btn">Connect Sheet</button>
       </div>
 
+      <!-- No Job Selected Section -->
+      <div id="no-job-section" class="section hidden">
+        <h2>No Job Selected</h2>
+        <p>Please visit a LinkedIn job page to save job details.</p>
+
+        <!-- Sheet Connection Status -->
+        <div id="sheet-info-no-job" class="sheet-info hidden">
+          <div class="sheet-header">
+            <strong>Connected to:</strong>
+            <span id="sheet-name-no-job">Loading...</span>
+            <button
+              id="disconnect-btn-no-job"
+              class="btn btn-secondary btn-small"
+            >
+              Disconnect
+            </button>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+          <button id="logout-btn" class="btn btn-secondary">Logout</button>
+        </div>
+      </div>
+
       <!-- Job Details Section -->
       <div id="job-section" class="section hidden">
         <h2>Job Details</h2>
@@ -72,8 +97,7 @@
           <div class="form-group">
             <label for="stage">Application Stage:</label>
             <select id="stage" required>
-              <option value="">Select Stage</option>
-              <option value="Applied">Applied</option>
+              <option value="Applied" selected>Applied</option>
               <option value="Interviewing">Interviewing</option>
               <option value="Ghosted">Ghosted</option>
               <option value="Rejected">Rejected</option>
@@ -84,8 +108,7 @@
           <div class="form-group">
             <label for="priority">Priority:</label>
             <select id="priority" required>
-              <option value="">Select Priority</option>
-              <option value="Low">Low</option>
+              <option value="Low" selected>Low</option>
               <option value="Medium">Medium</option>
               <option value="High">High</option>
             </select>
