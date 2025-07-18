@@ -21,7 +21,8 @@
         "https://www.linkedin.com/jobs/view/*",
         "https://www.linkedin.com/jobs/search/*",
         "https://www.linkedin.com/jobs/collections/*",
-        "https://www.linkedin.com/jobs/*"
+        "https://www.linkedin.com/jobs/*",
+        "https://www.seek.com.au/job/*"
       ],
       "js": ["src/content/content.js"],
       "css": ["src/content/content.css"],
