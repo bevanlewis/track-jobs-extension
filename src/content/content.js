@@ -10,7 +10,7 @@ let observerSetUp = false;
 // Helper function to determine the site based on URL
 function getSite() {
   const url = window.location.href;
-  if (url.includes("linkedin.com/jobs/view/")) return "linkedin";
+  if (url.includes("linkedin.com/jobs/")) return "linkedin";
   if (url.includes("seek.com.au/job/")) return "seek";
   if (url.includes("indeed.com/") && url.includes("vjk=")) return "indeed";
   return null;
@@ -36,6 +36,14 @@ function extractJobData() {
       );
       if (fallbackCompanyEl) {
         company = fallbackCompanyEl.textContent.trim();
+      } else {
+        // Additional fallback for job collections page
+        const collectionsCompanyEl = document.querySelector(
+          ".job-details-jobs-unified-top-card__company-name, .artdeco-entity-lockup__title"
+        );
+        if (collectionsCompanyEl) {
+          company = collectionsCompanyEl.textContent.trim();
+        }
       }
     }
 
@@ -54,6 +62,14 @@ function extractJobData() {
       );
       if (fallbackRoleEl) {
         role = fallbackRoleEl.textContent.trim();
+      } else {
+        // Additional fallback for job collections page
+        const collectionsRoleEl = document.querySelector(
+          ".job-details-jobs-unified-top-card__job-title, .job-details-jobs-unified-top-card__title-container h1, h1.text-heading-large"
+        );
+        if (collectionsRoleEl) {
+          role = collectionsRoleEl.textContent.trim();
+        }
       }
     }
 
@@ -173,24 +189,29 @@ function injectButton() {
 
   if (site === "linkedin") {
     // Try to find the job title element using the correct selector
-    const titleEl = document.querySelector(
+    let titleEl = document.querySelector(
       ".job-details-jobs-unified-top-card__job-title h1"
     );
+
+    // Fallback for job collections page
+    if (!titleEl) {
+      titleEl = document.querySelector(
+        ".job-details-jobs-unified-top-card__job-title, .job-details-jobs-unified-top-card__title-container h1, h1.text-heading-large"
+      );
+    }
+
     if (titleEl) {
       // Create the button
       const button = createSaveJobButton();
 
-      // Apply styling to the title element
-      titleEl.style.display = "inline-block";
-      titleEl.style.marginRight = "10px";
-
       // Apply styling to the button
       button.style.display = "inline-block";
       button.style.verticalAlign = "baseline";
+      button.style.marginLeft = "10px";
 
-      // Insert the button inside the title element
-      titleEl.appendChild(button);
-      console.log("Save Job button injected inside LinkedIn job title.");
+      // Insert the button after the title element (not inside it)
+      titleEl.parentNode.insertBefore(button, titleEl.nextSibling);
+      console.log("Save Job button injected next to LinkedIn job title.");
     } else {
       // If not found, try again after a short delay (DOM may not be ready)
       setTimeout(injectButton, 1000);
@@ -203,17 +224,14 @@ function injectButton() {
       // Create the button
       const button = createSaveJobButton();
 
-      // Apply styling to the title element
-      titleEl.style.display = "inline-block";
-      titleEl.style.marginRight = "10px";
-
       // Apply styling to the button
       button.style.display = "inline-block";
       button.style.verticalAlign = "baseline";
+      button.style.marginLeft = "10px";
 
-      // Insert the button inside the title element
-      titleEl.appendChild(button);
-      console.log("Save Job button injected inside Seek job title.");
+      // Insert the button after the title element (not inside it)
+      titleEl.parentNode.insertBefore(button, titleEl.nextSibling);
+      console.log("Save Job button injected next to Seek job title.");
     } else {
       setTimeout(injectButton, 1000);
     }
@@ -225,17 +243,14 @@ function injectButton() {
       // Create the button
       const button = createSaveJobButton();
 
-      // Apply styling to the title element
-      titleEl.style.display = "inline-block";
-      titleEl.style.marginRight = "10px";
-
       // Apply styling to the button
       button.style.display = "inline-block";
       button.style.verticalAlign = "baseline";
+      button.style.marginLeft = "10px";
 
-      // Insert the button inside the title element
-      titleEl.appendChild(button);
-      console.log("Save Job button injected inside Indeed job title.");
+      // Insert the button after the title element (not inside it)
+      titleEl.parentNode.insertBefore(button, titleEl.nextSibling);
+      console.log("Save Job button injected next to Indeed job title.");
     } else {
       setTimeout(injectButton, 1000);
     }
@@ -268,9 +283,12 @@ function setupObserver() {
             if (site === "linkedin") {
               if (
                 node.querySelector &&
-                node.querySelector(
+                (node.querySelector(
                   ".job-details-jobs-unified-top-card__job-title h1"
-                )
+                ) ||
+                  node.querySelector(
+                    ".job-details-jobs-unified-top-card__job-title, .job-details-jobs-unified-top-card__title-container h1, h1.text-heading-large"
+                  ))
               ) {
                 shouldReinject = true;
               }
