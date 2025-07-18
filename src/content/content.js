@@ -12,6 +12,7 @@ function getSite() {
   const url = window.location.href;
   if (url.includes("linkedin.com/jobs/view/")) return "linkedin";
   if (url.includes("seek.com.au/job/")) return "seek";
+  if (url.includes("indeed.com/") && url.includes("vjk=")) return "indeed";
   return null;
 }
 
@@ -102,6 +103,37 @@ function extractJobData() {
     });
 
     return { company, role, applicationLink, timestamp };
+  } else if (site === "indeed") {
+    // Extract from Indeed page
+    let company = "";
+    const companyEl = document.querySelector(
+      '[data-testid="inlineHeader-companyName"] a'
+    );
+    if (companyEl) {
+      company = companyEl.textContent.trim();
+    }
+
+    let role = "";
+    const roleEl = document.querySelector(
+      '[data-testid="jobsearch-JobInfoHeader-title"]'
+    );
+    if (roleEl) {
+      // Remove the " - job post" suffix if present
+      role = roleEl.textContent.trim().replace(" - job post", "");
+    }
+
+    const applicationLink = window.location.href;
+    const timestamp = new Date().toISOString();
+
+    // Log the extracted data
+    console.log("Extracted Job Data (Indeed):", {
+      company,
+      role,
+      applicationLink,
+      timestamp,
+    });
+
+    return { company, role, applicationLink, timestamp };
   }
 
   // If not a supported site, return empty
@@ -185,6 +217,28 @@ function injectButton() {
     } else {
       setTimeout(injectButton, 1000);
     }
+  } else if (site === "indeed") {
+    const titleEl = document.querySelector(
+      '[data-testid="jobsearch-JobInfoHeader-title"]'
+    );
+    if (titleEl) {
+      // Create the button
+      const button = createSaveJobButton();
+
+      // Apply styling to the title element
+      titleEl.style.display = "inline-block";
+      titleEl.style.marginRight = "10px";
+
+      // Apply styling to the button
+      button.style.display = "inline-block";
+      button.style.verticalAlign = "baseline";
+
+      // Insert the button inside the title element
+      titleEl.appendChild(button);
+      console.log("Save Job button injected inside Indeed job title.");
+    } else {
+      setTimeout(injectButton, 1000);
+    }
   }
 }
 
@@ -224,6 +278,15 @@ function setupObserver() {
               if (
                 node.querySelector &&
                 node.querySelector('[data-automation="job-detail-title"]')
+              ) {
+                shouldReinject = true;
+              }
+            } else if (site === "indeed") {
+              if (
+                node.querySelector &&
+                node.querySelector(
+                  '[data-testid="jobsearch-JobInfoHeader-title"]'
+                )
               ) {
                 shouldReinject = true;
               }

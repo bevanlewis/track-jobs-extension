@@ -22,7 +22,9 @@
         "https://www.linkedin.com/jobs/search/*",
         "https://www.linkedin.com/jobs/collections/*",
         "https://www.linkedin.com/jobs/*",
-        "https://www.seek.com.au/job/*"
+        "https://www.seek.com.au/job/*",
+        "https://au.indeed.com/*",
+        "https://*.indeed.com/*"
       ],
       "js": ["src/content/content.js"],
       "css": ["src/content/content.css"],
